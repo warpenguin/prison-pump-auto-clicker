@@ -45,6 +45,7 @@ Public Class Form1
     Private Const MOD_NONE As Integer = 0
     Private Const VK_F6 As Integer = &H75
     Private Const VK_F7 As Integer = &H76
+    Private Const VK_F8 As Integer = &H77
 
     ' Form variables
     Private clickingEnabled As Boolean = False
@@ -208,9 +209,9 @@ Public Class Form1
         lblClickCount.Location = New Point(10, 45)
 
         Dim lblHotkey As New Label()
-        lblHotkey.Text = "Hotkeys: F6 (Toggle), F7 (Complete Setup)"
+        lblHotkey.Text = "Hotkeys: F6 (Toggle), F7 (Setup), F8 (Force Stop)"
         lblHotkey.Location = New Point(10, 65)
-        lblHotkey.Size = New Size(300, 15)
+        lblHotkey.Size = New Size(350, 15)
 
         Dim btnReset As New Button()
         btnReset.Name = "btnReset"
@@ -222,7 +223,7 @@ Public Class Form1
         Dim lblCurrentPos As New Label()
         lblCurrentPos.Name = "lblCurrentPos"
         lblCurrentPos.Text = "Current Cursor: Press F7"
-        lblCurrentPos.Location = New Point(200, 65)
+        lblCurrentPos.Location = New Point(200, 45)
         lblCurrentPos.Size = New Size(150, 15)
 
         grpStatus.Controls.AddRange({lblStatus, lblClickCount, lblHotkey, lblCurrentPos, btnReset})
@@ -244,6 +245,7 @@ Public Class Form1
     Private Sub RegisterHotkeys()
         RegisterHotKey(Me.Handle, 1, MOD_NONE, VK_F6)
         RegisterHotKey(Me.Handle, 2, MOD_NONE, VK_F7)
+        RegisterHotKey(Me.Handle, 3, MOD_NONE, VK_F8)
     End Sub
 
     Protected Overrides Sub WndProc(ByRef m As Message)
@@ -255,6 +257,9 @@ Public Class Form1
             ElseIf m.WParam.ToInt32() = 2 Then
                 ' F7 pressed - Get cursor coordinates
                 GetCurrentCursorPosition()
+            ElseIf m.WParam.ToInt32() = 3 Then
+                ' F8 pressed - Force stop clicking
+                ForceStopClicking()
             End If
         End If
     End Sub
@@ -290,6 +295,9 @@ Public Class Form1
                 ' Handle any errors in color detection
                 UpdateColorStatus(False, Color.Black)
             End Try
+        Else
+            ' If color detection is disabled, stop the timer
+            colorDetectionTimer.Stop()
         End If
     End Sub
 
@@ -403,6 +411,26 @@ Public Class Form1
         UpdateUI()
     End Sub
 
+    Private Sub ForceStopClicking()
+        ' Force stop all clicking activities permanently
+        clickingEnabled = False
+        colorDetectionActive = False
+        colorDetectionEnabled = False
+
+        ' Stop all timers
+        clickTimer.Stop()
+        colorDetectionTimer.Stop()
+
+        ' Disable color detection checkbox
+        Dim chkColorDetection As CheckBox = DirectCast(Me.Controls.Find("chkColorDetection", True)(0).Parent.Controls.Find("chkColorDetection", True)(0), CheckBox)
+        chkColorDetection.Checked = False
+
+        UpdateUI()
+
+        ' Show confirmation message
+        MessageBox.Show("Auto-clicker completely stopped!" & vbCrLf & "All automatic functions disabled.", "F8 - Force Stop", MessageBoxButtons.OK, MessageBoxIcon.Information)
+    End Sub
+
     Private Sub BtnSetPosition_Click(sender As Object, e As EventArgs)
         Me.WindowState = FormWindowState.Minimized
         Thread.Sleep(1000) ' Give user time to position cursor
@@ -514,6 +542,7 @@ Public Class Form1
     Private Sub Form1_FormClosing(sender As Object, e As FormClosingEventArgs) Handles MyBase.FormClosing
         UnregisterHotKey(Me.Handle, 1)
         UnregisterHotKey(Me.Handle, 2)
+        UnregisterHotKey(Me.Handle, 3)
         clickTimer.Stop()
         colorDetectionTimer.Stop()
     End Sub
