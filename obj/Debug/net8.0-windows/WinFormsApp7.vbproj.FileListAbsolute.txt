@@ -1,0 +1,16 @@
+C:\Users\penguin\source\repos\WinFormsApp7\WinFormsApp7\bin\Debug\net8.0-windows\WinFormsApp7.exe
+C:\Users\penguin\source\repos\WinFormsApp7\WinFormsApp7\bin\Debug\net8.0-windows\WinFormsApp7.deps.json
+C:\Users\penguin\source\repos\WinFormsApp7\WinFormsApp7\bin\Debug\net8.0-windows\WinFormsApp7.runtimeconfig.json
+C:\Users\penguin\source\repos\WinFormsApp7\WinFormsApp7\bin\Debug\net8.0-windows\WinFormsApp7.dll
+C:\Users\penguin\source\repos\WinFormsApp7\WinFormsApp7\bin\Debug\net8.0-windows\WinFormsApp7.pdb
+C:\Users\penguin\source\repos\WinFormsApp7\WinFormsApp7\obj\Debug\net8.0-windows\WinFormsApp7.Form1.resources
+C:\Users\penguin\source\repos\WinFormsApp7\WinFormsApp7\obj\Debug\net8.0-windows\WinFormsApp7.vbproj.GenerateResource.cache
+C:\Users\penguin\source\repos\WinFormsApp7\WinFormsApp7\obj\Debug\net8.0-windows\WinFormsApp7.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\penguin\source\repos\WinFormsApp7\WinFormsApp7\obj\Debug\net8.0-windows\WinFormsApp7.AssemblyInfoInputs.cache
+C:\Users\penguin\source\repos\WinFormsApp7\WinFormsApp7\obj\Debug\net8.0-windows\WinFormsApp7.AssemblyInfo.vb
+C:\Users\penguin\source\repos\WinFormsApp7\WinFormsApp7\obj\Debug\net8.0-windows\WinFormsApp7.vbproj.CoreCompileInputs.cache
+C:\Users\penguin\source\repos\WinFormsApp7\WinFormsApp7\obj\Debug\net8.0-windows\WinFormsApp7.dll
+C:\Users\penguin\source\repos\WinFormsApp7\WinFormsApp7\obj\Debug\net8.0-windows\refint\WinFormsApp7.dll
+C:\Users\penguin\source\repos\WinFormsApp7\WinFormsApp7\obj\Debug\net8.0-windows\WinFormsApp7.pdb
+C:\Users\penguin\source\repos\WinFormsApp7\WinFormsApp7\obj\Debug\net8.0-windows\WinFormsApp7.genruntimeconfig.cache
+C:\Users\penguin\source\repos\WinFormsApp7\WinFormsApp7\obj\Debug\net8.0-windows\ref\WinFormsApp7.dll
