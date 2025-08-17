@@ -57,6 +57,21 @@ Public Class Form1
     Private isPositionSet As Boolean = False
     Private colorDetectionEnabled As Boolean = False
     Private colorDetectionActive As Boolean = False
+    Private clickCount As Integer = 0
+
+    ' Control references to avoid repeated searches
+    Private nudInterval As NumericUpDown
+    Private cmbClickType As ComboBox
+    Private btnStartStop As Button
+    Private lblPosition As Label
+    Private lblStatus As Label
+    Private lblClickCount As Label
+    Private lblCurrentPos As Label
+    Private lblColorPos As Label
+    Private lblColorStatus As Label
+    Private chkColorDetection As CheckBox
+    Private btnColorPicker As Button
+    Private nudTolerance As NumericUpDown
 
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         SetupForm()
@@ -67,7 +82,7 @@ Public Class Form1
 
     Private Sub SetupForm()
         Me.Text = "Advanced Auto-Clicker"
-        Me.Size = New Size(450, 600)
+        Me.Size = New Size(450, 650) ' Increased height to prevent overlapping
         Me.StartPosition = FormStartPosition.CenterScreen
         Me.FormBorderStyle = FormBorderStyle.FixedSingle
         Me.MaximizeBox = False
@@ -82,13 +97,14 @@ Public Class Form1
         Dim grpInterval As New GroupBox()
         grpInterval.Text = "Click Settings"
         grpInterval.Location = New Point(10, 10)
-        grpInterval.Size = New Size(410, 120)
+        grpInterval.Size = New Size(410, 130) ' Increased height
 
         Dim lblInterval As New Label()
         lblInterval.Text = "Click Interval (ms):"
         lblInterval.Location = New Point(10, 25)
+        lblInterval.Size = New Size(100, 15)
 
-        Dim nudInterval As New NumericUpDown()
+        nudInterval = New NumericUpDown()
         nudInterval.Name = "nudInterval"
         nudInterval.Location = New Point(120, 22)
         nudInterval.Size = New Size(80, 20)
@@ -99,8 +115,9 @@ Public Class Form1
         Dim lblClickType As New Label()
         lblClickType.Text = "Click Type:"
         lblClickType.Location = New Point(220, 25)
+        lblClickType.Size = New Size(60, 15)
 
-        Dim cmbClickType As New ComboBox()
+        cmbClickType = New ComboBox()
         cmbClickType.Name = "cmbClickType"
         cmbClickType.Location = New Point(290, 22)
         cmbClickType.Size = New Size(100, 20)
@@ -115,13 +132,13 @@ Public Class Form1
         btnSetPosition.Size = New Size(120, 25)
         AddHandler btnSetPosition.Click, AddressOf BtnSetPosition_Click
 
-        Dim lblPosition As New Label()
+        lblPosition = New Label()
         lblPosition.Name = "lblPosition"
         lblPosition.Text = "Position: Not Set"
         lblPosition.Location = New Point(140, 60)
         lblPosition.Size = New Size(150, 15)
 
-        Dim btnStartStop As New Button()
+        btnStartStop = New Button()
         btnStartStop.Name = "btnStartStop"
         btnStartStop.Text = "Start Clicking (F6)"
         btnStartStop.Location = New Point(300, 55)
@@ -131,23 +148,25 @@ Public Class Form1
 
         grpInterval.Controls.AddRange({lblInterval, nudInterval, lblClickType, cmbClickType, btnSetPosition, lblPosition, btnStartStop})
 
-        ' Color Detection GroupBox
+        ' Color Detection GroupBox - Moved down and increased height
         Dim grpColor As New GroupBox()
         grpColor.Text = "Color Detection"
-        grpColor.Location = New Point(10, 140)
-        grpColor.Size = New Size(410, 150)
+        grpColor.Location = New Point(10, 150) ' Moved down from 140
+        grpColor.Size = New Size(410, 160) ' Increased height from 150
 
-        Dim chkColorDetection As New CheckBox()
+        chkColorDetection = New CheckBox()
         chkColorDetection.Name = "chkColorDetection"
         chkColorDetection.Text = "Enable Color Detection"
         chkColorDetection.Location = New Point(10, 25)
+        chkColorDetection.Size = New Size(200, 20)
         AddHandler chkColorDetection.CheckedChanged, AddressOf ChkColorDetection_CheckedChanged
 
         Dim lblTargetColor As New Label()
         lblTargetColor.Text = "Target Color:"
         lblTargetColor.Location = New Point(10, 55)
+        lblTargetColor.Size = New Size(70, 15)
 
-        Dim btnColorPicker As New Button()
+        btnColorPicker = New Button()
         btnColorPicker.Name = "btnColorPicker"
         btnColorPicker.Text = "Pick Color"
         btnColorPicker.Location = New Point(90, 52)
@@ -158,18 +177,21 @@ Public Class Form1
         Dim lblTolerance As New Label()
         lblTolerance.Text = "Tolerance:"
         lblTolerance.Location = New Point(190, 55)
+        lblTolerance.Size = New Size(60, 15)
 
-        Dim nudTolerance As New NumericUpDown()
+        nudTolerance = New NumericUpDown()
         nudTolerance.Name = "nudTolerance"
         nudTolerance.Location = New Point(250, 52)
         nudTolerance.Size = New Size(60, 20)
         nudTolerance.Minimum = 0
         nudTolerance.Maximum = 255
         nudTolerance.Value = colorTolerance
+        AddHandler nudTolerance.ValueChanged, AddressOf NudTolerance_ValueChanged
 
         Dim lblColorPosition As New Label()
         lblColorPosition.Text = "Detection Position:"
         lblColorPosition.Location = New Point(10, 85)
+        lblColorPosition.Size = New Size(100, 15)
 
         Dim btnSetColorPosition As New Button()
         btnSetColorPosition.Name = "btnSetColorPosition"
@@ -178,53 +200,55 @@ Public Class Form1
         btnSetColorPosition.Size = New Size(80, 23)
         AddHandler btnSetColorPosition.Click, AddressOf BtnSetColorPosition_Click
 
-        Dim lblColorPos As New Label()
+        lblColorPos = New Label()
         lblColorPos.Name = "lblColorPos"
         lblColorPos.Text = "Pos: 100, 100"
         lblColorPos.Location = New Point(210, 87)
+        lblColorPos.Size = New Size(100, 15)
 
-        Dim lblColorStatus As New Label()
+        lblColorStatus = New Label()
         lblColorStatus.Name = "lblColorStatus"
         lblColorStatus.Text = "Status: Inactive"
-        lblColorStatus.Location = New Point(10, 115)
-        lblColorStatus.Size = New Size(200, 15)
+        lblColorStatus.Location = New Point(10, 115) ' Better spacing
+        lblColorStatus.Size = New Size(390, 30) ' Increased width and height for long text
 
         grpColor.Controls.AddRange({chkColorDetection, lblTargetColor, btnColorPicker, lblTolerance, nudTolerance, lblColorPosition, btnSetColorPosition, lblColorPos, lblColorStatus})
 
-        ' Status GroupBox
+        ' Status GroupBox - Moved down to avoid overlap
         Dim grpStatus As New GroupBox()
         grpStatus.Text = "Status & Information"
-        grpStatus.Location = New Point(10, 300)
-        grpStatus.Size = New Size(410, 120)
+        grpStatus.Location = New Point(10, 320) ' Moved down from 300
+        grpStatus.Size = New Size(410, 140) ' Increased height
 
-        Dim lblStatus As New Label()
+        lblStatus = New Label()
         lblStatus.Name = "lblStatus"
         lblStatus.Text = "Status: Ready"
         lblStatus.Location = New Point(10, 25)
         lblStatus.Size = New Size(200, 15)
 
-        Dim lblClickCount As New Label()
+        lblClickCount = New Label()
         lblClickCount.Name = "lblClickCount"
         lblClickCount.Text = "Clicks Performed: 0"
         lblClickCount.Location = New Point(10, 45)
+        lblClickCount.Size = New Size(150, 15)
 
         Dim lblHotkey As New Label()
         lblHotkey.Text = "Hotkeys: F6 (Toggle), F7 (Setup), F8 (Force Stop)"
         lblHotkey.Location = New Point(10, 65)
         lblHotkey.Size = New Size(350, 15)
 
-        Dim btnReset As New Button()
-        btnReset.Name = "btnReset"
-        btnReset.Text = "Reset Count"
-        btnReset.Location = New Point(10, 85)
-        btnReset.Size = New Size(80, 25)
-        AddHandler btnReset.Click, AddressOf BtnReset_Click
-
-        Dim lblCurrentPos As New Label()
+        lblCurrentPos = New Label()
         lblCurrentPos.Name = "lblCurrentPos"
         lblCurrentPos.Text = "Current Cursor: Press F7"
         lblCurrentPos.Location = New Point(200, 45)
-        lblCurrentPos.Size = New Size(150, 15)
+        lblCurrentPos.Size = New Size(200, 15)
+
+        Dim btnReset As New Button()
+        btnReset.Name = "btnReset"
+        btnReset.Text = "Reset Count"
+        btnReset.Location = New Point(10, 90) ' Moved down to avoid overlap
+        btnReset.Size = New Size(80, 25)
+        AddHandler btnReset.Click, AddressOf BtnReset_Click
 
         grpStatus.Controls.AddRange({lblStatus, lblClickCount, lblHotkey, lblCurrentPos, btnReset})
 
@@ -243,28 +267,34 @@ Public Class Form1
     End Sub
 
     Private Sub RegisterHotkeys()
-        RegisterHotKey(Me.Handle, 1, MOD_NONE, VK_F6)
-        RegisterHotKey(Me.Handle, 2, MOD_NONE, VK_F7)
-        RegisterHotKey(Me.Handle, 3, MOD_NONE, VK_F8)
+        Try
+            RegisterHotKey(Me.Handle, 1, MOD_NONE, VK_F6)
+            RegisterHotKey(Me.Handle, 2, MOD_NONE, VK_F7)
+            RegisterHotKey(Me.Handle, 3, MOD_NONE, VK_F8)
+        Catch ex As Exception
+            MessageBox.Show("Failed to register hotkeys: " & ex.Message, "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+        End Try
     End Sub
 
     Protected Overrides Sub WndProc(ByRef m As Message)
         MyBase.WndProc(m)
         If m.Msg = WM_HOTKEY Then
-            If m.WParam.ToInt32() = 1 Then
-                ' F6 pressed - Toggle clicking
-                ToggleClicking()
-            ElseIf m.WParam.ToInt32() = 2 Then
-                ' F7 pressed - Get cursor coordinates
-                GetCurrentCursorPosition()
-            ElseIf m.WParam.ToInt32() = 3 Then
-                ' F8 pressed - Force stop clicking
-                ForceStopClicking()
-            End If
+            Try
+                If m.WParam.ToInt32() = 1 Then
+                    ' F6 pressed - Toggle clicking
+                    ToggleClicking()
+                ElseIf m.WParam.ToInt32() = 2 Then
+                    ' F7 pressed - Get cursor coordinates
+                    GetCurrentCursorPosition()
+                ElseIf m.WParam.ToInt32() = 3 Then
+                    ' F8 pressed - Force stop clicking
+                    ForceStopClicking()
+                End If
+            Catch ex As Exception
+                ' Handle hotkey processing errors silently
+            End Try
         End If
     End Sub
-
-    Private clickCount As Integer = 0
 
     Private Sub ClickTimer_Tick(sender As Object, e As EventArgs)
         If clickingEnabled AndAlso isPositionSet Then
@@ -295,29 +325,34 @@ Public Class Form1
                 ' Handle any errors in color detection
                 UpdateColorStatus(False, Color.Black)
             End Try
-        Else
-            ' If color detection is disabled, stop the timer
-            colorDetectionTimer.Stop()
         End If
     End Sub
 
     Private Sub PerformClick()
-        Dim cmbClickType As ComboBox = DirectCast(Me.Controls.Find("cmbClickType", True)(0).Parent.Controls.Find("cmbClickType", True)(0), ComboBox)
-
-        If cmbClickType.SelectedIndex = 0 Then
-            ' Left click
-            mouse_event(MOUSEEVENTF_LEFTDOWN, clickPosition.X, clickPosition.Y, 0, 0)
-            mouse_event(MOUSEEVENTF_LEFTUP, clickPosition.X, clickPosition.Y, 0, 0)
-        Else
-            ' Right click
-            mouse_event(MOUSEEVENTF_RIGHTDOWN, clickPosition.X, clickPosition.Y, 0, 0)
-            mouse_event(MOUSEEVENTF_RIGHTUP, clickPosition.X, clickPosition.Y, 0, 0)
-        End If
+        Try
+            If cmbClickType.SelectedIndex = 0 Then
+                ' Left click
+                mouse_event(MOUSEEVENTF_LEFTDOWN, clickPosition.X, clickPosition.Y, 0, 0)
+                mouse_event(MOUSEEVENTF_LEFTUP, clickPosition.X, clickPosition.Y, 0, 0)
+            Else
+                ' Right click
+                mouse_event(MOUSEEVENTF_RIGHTDOWN, clickPosition.X, clickPosition.Y, 0, 0)
+                mouse_event(MOUSEEVENTF_RIGHTUP, clickPosition.X, clickPosition.Y, 0, 0)
+            End If
+        Catch ex As Exception
+            ' Handle mouse event errors
+            StopClicking()
+            MessageBox.Show("Error performing click: " & ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        End Try
     End Sub
 
     Private Function GetPixelColor(x As Integer, y As Integer) As Color
         Try
             Dim hdc As IntPtr = GetDC(IntPtr.Zero)
+            If hdc = IntPtr.Zero Then
+                Return Color.Black
+            End If
+
             Dim pixel As UInteger = GetPixel(hdc, x, y)
             ReleaseDC(IntPtr.Zero, hdc)
 
@@ -344,40 +379,42 @@ Public Class Form1
     End Function
 
     Private Sub GetCurrentCursorPosition()
-        Dim currentPos As Point
-        GetCursorPos(currentPos)
+        Try
+            Dim currentPos As Point
+            If GetCursorPos(currentPos) Then
+                ' Set this as the click position
+                clickPosition = currentPos
+                isPositionSet = True
 
-        ' Set this as the click position
-        clickPosition = currentPos
-        isPositionSet = True
+                ' Update the current position label
+                lblCurrentPos.Text = $"Current Cursor: {currentPos.X}, {currentPos.Y}"
 
-        ' Update the current position label
-        Dim lblCurrentPos As Label = DirectCast(Me.Controls.Find("lblCurrentPos", True)(0).Parent.Controls.Find("lblCurrentPos", True)(0), Label)
-        lblCurrentPos.Text = $"Current Cursor: {currentPos.X}, {currentPos.Y}"
+                ' Also get the color at that position for reference
+                Dim currentColor As Color = GetPixelColor(currentPos.X, currentPos.Y)
 
-        ' Also get the color at that position for reference
-        Dim currentColor As Color = GetPixelColor(currentPos.X, currentPos.Y)
+                ' Store the color for color detection
+                targetColor = currentColor
 
-        ' Store the color for color detection
-        targetColor = currentColor
+                ' Update the color picker button to show the new color
+                btnColorPicker.BackColor = targetColor
 
-        ' Update the color picker button to show the new color
-        Dim btnColorPicker As Button = DirectCast(Me.Controls.Find("btnColorPicker", True)(0).Parent.Controls.Find("btnColorPicker", True)(0), Button)
-        btnColorPicker.BackColor = targetColor
+                ' Update UI to reflect new click position
+                UpdateUI()
+                UpdateColorPositionLabel()
 
-        ' Update UI to reflect new click position
-        UpdateUI()
-        UpdateColorPositionLabel()
+                ' Show a temporary message with detailed info
+                Dim message As String = $"Position: {currentPos.X}, {currentPos.Y}" & vbCrLf &
+                                       $"Color captured: R{currentColor.R}, G{currentColor.G}, B{currentColor.B}" & vbCrLf &
+                                       $"Hex Color: #{currentColor.R:X2}{currentColor.G:X2}{currentColor.B:X2}" & vbCrLf & vbCrLf &
+                                       "✓ Click position set!" & vbCrLf &
+                                       "✓ Color saved for detection!" & vbCrLf &
+                                       "✓ Detection position updated!"
 
-        ' Show a temporary message with detailed info
-        Dim message As String = $"Position: {currentPos.X}, {currentPos.Y}" & vbCrLf &
-                               $"Color captured: R{currentColor.R}, G{currentColor.G}, B{currentColor.B}" & vbCrLf &
-                               $"Hex Color: #{currentColor.R:X2}{currentColor.G:X2}{currentColor.B:X2}" & vbCrLf & vbCrLf &
-                               "✓ Click position set!" & vbCrLf &
-                               "✓ Color saved for detection!" & vbCrLf &
-                               "✓ Detection position updated!"
-
-        MessageBox.Show(message, "Complete Setup - F7", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                MessageBox.Show(message, "Complete Setup - F7", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            End If
+        Catch ex As Exception
+            MessageBox.Show("Error getting cursor position: " & ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        End Try
     End Sub
 
     Private Sub BtnStartStop_Click(sender As Object, e As EventArgs)
@@ -398,11 +435,15 @@ Public Class Form1
             Return
         End If
 
-        clickingEnabled = True
-        Dim nudInterval As NumericUpDown = DirectCast(Me.Controls.Find("nudInterval", True)(0).Parent.Controls.Find("nudInterval", True)(0), NumericUpDown)
-        clickTimer.Interval = CInt(nudInterval.Value)
-        clickTimer.Start()
-        UpdateUI()
+        Try
+            clickingEnabled = True
+            clickTimer.Interval = CInt(nudInterval.Value)
+            clickTimer.Start()
+            UpdateUI()
+        Catch ex As Exception
+            MessageBox.Show("Error starting clicking: " & ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            clickingEnabled = False
+        End Try
     End Sub
 
     Private Sub StopClicking()
@@ -412,77 +453,95 @@ Public Class Form1
     End Sub
 
     Private Sub ForceStopClicking()
-        ' Force stop all clicking activities permanently
-        clickingEnabled = False
-        colorDetectionActive = False
-        colorDetectionEnabled = False
+        Try
+            ' Force stop all clicking activities permanently
+            clickingEnabled = False
+            colorDetectionActive = False
+            colorDetectionEnabled = False
 
-        ' Stop all timers
-        clickTimer.Stop()
-        colorDetectionTimer.Stop()
+            ' Stop all timers
+            clickTimer.Stop()
+            colorDetectionTimer.Stop()
 
-        ' Disable color detection checkbox
-        Dim chkColorDetection As CheckBox = DirectCast(Me.Controls.Find("chkColorDetection", True)(0).Parent.Controls.Find("chkColorDetection", True)(0), CheckBox)
-        chkColorDetection.Checked = False
+            ' Disable color detection checkbox
+            chkColorDetection.Checked = False
 
-        UpdateUI()
+            UpdateUI()
 
-        ' Show confirmation message
-        MessageBox.Show("Auto-clicker completely stopped!" & vbCrLf & "All automatic functions disabled.", "F8 - Force Stop", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            ' Show confirmation message
+            MessageBox.Show("Auto-clicker completely stopped!" & vbCrLf & "All automatic functions disabled.", "F8 - Force Stop", MessageBoxButtons.OK, MessageBoxIcon.Information)
+        Catch ex As Exception
+            MessageBox.Show("Error stopping clicker: " & ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        End Try
     End Sub
 
     Private Sub BtnSetPosition_Click(sender As Object, e As EventArgs)
-        Me.WindowState = FormWindowState.Minimized
-        Thread.Sleep(1000) ' Give user time to position cursor
+        Try
+            Me.WindowState = FormWindowState.Minimized
+            Thread.Sleep(1000) ' Give user time to position cursor
 
-        GetCursorPos(clickPosition)
-        isPositionSet = True
+            GetCursorPos(clickPosition)
+            isPositionSet = True
 
-        Me.WindowState = FormWindowState.Normal
-        UpdateUI()
+            Me.WindowState = FormWindowState.Normal
+            UpdateUI()
+        Catch ex As Exception
+            Me.WindowState = FormWindowState.Normal
+            MessageBox.Show("Error setting position: " & ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        End Try
     End Sub
 
     Private Sub BtnSetColorPosition_Click(sender As Object, e As EventArgs)
-        Me.WindowState = FormWindowState.Minimized
-        Thread.Sleep(1000)
+        Try
+            Me.WindowState = FormWindowState.Minimized
+            Thread.Sleep(1000)
 
-        GetCursorPos(clickPosition)
+            GetCursorPos(clickPosition)
 
-        Me.WindowState = FormWindowState.Normal
-        UpdateColorPositionLabel()
+            Me.WindowState = FormWindowState.Normal
+            UpdateColorPositionLabel()
+        Catch ex As Exception
+            Me.WindowState = FormWindowState.Normal
+            MessageBox.Show("Error setting color position: " & ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        End Try
     End Sub
 
     Private Sub BtnColorPicker_Click(sender As Object, e As EventArgs)
-        Dim colorDialog As New ColorDialog()
-        colorDialog.Color = targetColor
+        Try
+            Dim colorDialog As New ColorDialog()
+            colorDialog.Color = targetColor
 
-        If colorDialog.ShowDialog() = DialogResult.OK Then
-            targetColor = colorDialog.Color
-            Dim btnColorPicker As Button = DirectCast(sender, Button)
-            btnColorPicker.BackColor = targetColor
-        End If
+            If colorDialog.ShowDialog() = DialogResult.OK Then
+                targetColor = colorDialog.Color
+                btnColorPicker.BackColor = targetColor
+            End If
+        Catch ex As Exception
+            MessageBox.Show("Error picking color: " & ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        End Try
+    End Sub
+
+    Private Sub NudTolerance_ValueChanged(sender As Object, e As EventArgs)
+        colorTolerance = CInt(nudTolerance.Value)
     End Sub
 
     Private Sub ChkColorDetection_CheckedChanged(sender As Object, e As EventArgs)
-        Dim chk As CheckBox = DirectCast(sender, CheckBox)
-        colorDetectionEnabled = chk.Checked
+        Try
+            colorDetectionEnabled = chkColorDetection.Checked
 
-        If colorDetectionEnabled Then
-            colorDetectionTimer.Start()
-        Else
-            colorDetectionTimer.Stop()
-            colorDetectionActive = False
-            If clickingEnabled AndAlso colorDetectionActive Then
-                StopClicking()
+            If colorDetectionEnabled Then
+                colorDetectionTimer.Start()
+            Else
+                colorDetectionTimer.Stop()
+                colorDetectionActive = False
+                If clickingEnabled AndAlso colorDetectionActive Then
+                    StopClicking()
+                End If
             End If
-        End If
 
-        UpdateUI()
-    End Sub
-
-    Private Sub ChkAlwaysOnTop_CheckedChanged(sender As Object, e As EventArgs)
-        Dim chk As CheckBox = DirectCast(sender, CheckBox)
-        Me.TopMost = chk.Checked
+            UpdateUI()
+        Catch ex As Exception
+            MessageBox.Show("Error toggling color detection: " & ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        End Try
     End Sub
 
     Private Sub BtnReset_Click(sender As Object, e As EventArgs)
@@ -491,59 +550,71 @@ Public Class Form1
     End Sub
 
     Private Sub UpdateUI()
-        Dim btnStartStop As Button = DirectCast(Me.Controls.Find("btnStartStop", True)(0).Parent.Controls.Find("btnStartStop", True)(0), Button)
-        Dim lblStatus As Label = DirectCast(Me.Controls.Find("lblStatus", True)(0).Parent.Controls.Find("lblStatus", True)(0), Label)
-        Dim lblPosition As Label = DirectCast(Me.Controls.Find("lblPosition", True)(0).Parent.Controls.Find("lblPosition", True)(0), Label)
+        Try
+            If clickingEnabled Then
+                btnStartStop.Text = "Stop Clicking (F6)"
+                btnStartStop.BackColor = Color.LightCoral
+                lblStatus.Text = "Status: Clicking Active"
+            Else
+                btnStartStop.Text = "Start Clicking (F6)"
+                btnStartStop.BackColor = Color.LightGreen
+                lblStatus.Text = "Status: Ready"
+            End If
 
-        If clickingEnabled Then
-            btnStartStop.Text = "Stop Clicking (F6)"
-            btnStartStop.BackColor = Color.LightCoral
-            lblStatus.Text = "Status: Clicking Active"
-        Else
-            btnStartStop.Text = "Start Clicking (F6)"
-            btnStartStop.BackColor = Color.LightGreen
-            lblStatus.Text = "Status: Ready"
-        End If
-
-        If isPositionSet Then
-            lblPosition.Text = $"Position: {clickPosition.X}, {clickPosition.Y}"
-        Else
-            lblPosition.Text = "Position: Not Set"
-        End If
+            If isPositionSet Then
+                lblPosition.Text = $"Position: {clickPosition.X}, {clickPosition.Y}"
+            Else
+                lblPosition.Text = "Position: Not Set"
+            End If
+        Catch ex As Exception
+            ' Handle UI update errors silently
+        End Try
     End Sub
 
     Private Sub UpdateClickCount()
-        Dim lblClickCount As Label = DirectCast(Me.Controls.Find("lblClickCount", True)(0).Parent.Controls.Find("lblClickCount", True)(0), Label)
-        lblClickCount.Text = $"Clicks Performed: {clickCount}"
+        Try
+            lblClickCount.Text = $"Clicks Performed: {clickCount}"
+        Catch ex As Exception
+            ' Handle update errors silently
+        End Try
     End Sub
 
     Private Sub UpdateColorPositionLabel()
-        Dim lblColorPos As Label = DirectCast(Me.Controls.Find("lblColorPos", True)(0).Parent.Controls.Find("lblColorPos", True)(0), Label)
-        lblColorPos.Text = $"Pos: {clickPosition.X}, {clickPosition.Y}"
+        Try
+            lblColorPos.Text = $"Pos: {clickPosition.X}, {clickPosition.Y}"
+        Catch ex As Exception
+            ' Handle update errors silently
+        End Try
     End Sub
 
     Private Sub UpdateColorStatus(colorMatch As Boolean, currentColor As Color)
-        Dim lblColorStatus As Label = DirectCast(Me.Controls.Find("lblColorStatus", True)(0).Parent.Controls.Find("lblColorStatus", True)(0), Label)
-
-        If colorDetectionEnabled Then
-            If colorMatch Then
-                lblColorStatus.Text = "Status: Color Detected - Active"
-                lblColorStatus.ForeColor = Color.Green
+        Try
+            If colorDetectionEnabled Then
+                If colorMatch Then
+                    lblColorStatus.Text = "Status: Color Detected - Active"
+                    lblColorStatus.ForeColor = Color.Green
+                Else
+                    lblColorStatus.Text = $"Status: Monitoring - Current: R{currentColor.R},G{currentColor.G},B{currentColor.B}"
+                    lblColorStatus.ForeColor = Color.Blue
+                End If
             Else
-                lblColorStatus.Text = $"Status: Monitoring - Current: R{currentColor.R},G{currentColor.G},B{currentColor.B}"
-                lblColorStatus.ForeColor = Color.Blue
+                lblColorStatus.Text = "Status: Inactive"
+                lblColorStatus.ForeColor = Color.Black
             End If
-        Else
-            lblColorStatus.Text = "Status: Inactive"
-            lblColorStatus.ForeColor = Color.Black
-        End If
+        Catch ex As Exception
+            ' Handle status update errors silently
+        End Try
     End Sub
 
     Private Sub Form1_FormClosing(sender As Object, e As FormClosingEventArgs) Handles MyBase.FormClosing
-        UnregisterHotKey(Me.Handle, 1)
-        UnregisterHotKey(Me.Handle, 2)
-        UnregisterHotKey(Me.Handle, 3)
-        clickTimer.Stop()
-        colorDetectionTimer.Stop()
+        Try
+            UnregisterHotKey(Me.Handle, 1)
+            UnregisterHotKey(Me.Handle, 2)
+            UnregisterHotKey(Me.Handle, 3)
+            clickTimer.Stop()
+            colorDetectionTimer.Stop()
+        Catch ex As Exception
+            ' Handle cleanup errors silently
+        End Try
     End Sub
 End Class
