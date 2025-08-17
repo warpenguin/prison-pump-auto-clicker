@@ -1,4 +1,4 @@
-   <div style="font-size: 24px;">
+   <div style="font-size: 40px;">
    WINDOWS ONLY
    </div>
 
