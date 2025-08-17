@@ -72,6 +72,7 @@ Public Class Form1
     Private chkColorDetection As CheckBox
     Private btnColorPicker As Button
     Private nudTolerance As NumericUpDown
+    Private chkAlwaysOnTop As CheckBox
 
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         SetupForm()
@@ -82,11 +83,11 @@ Public Class Form1
 
     Private Sub SetupForm()
         Me.Text = "Advanced Auto-Clicker"
-        Me.Size = New Size(450, 650) ' Increased height to prevent overlapping
+        Me.Size = New Size(450, 680) ' Increased height to accommodate new checkbox
         Me.StartPosition = FormStartPosition.CenterScreen
         Me.FormBorderStyle = FormBorderStyle.FixedSingle
         Me.MaximizeBox = False
-        Me.TopMost = True ' Always stay on top like Task Manager
+        Me.TopMost = True ' Always stay on top like Task Manager (default)
 
         ' Create controls
         CreateControls()
@@ -148,10 +149,21 @@ Public Class Form1
 
         grpInterval.Controls.AddRange({lblInterval, nudInterval, lblClickType, cmbClickType, btnSetPosition, lblPosition, btnStartStop})
 
+        ' Always On Top CheckBox (outside of groupboxes for better visibility)
+        chkAlwaysOnTop = New CheckBox()
+        chkAlwaysOnTop.Name = "chkAlwaysOnTop"
+        chkAlwaysOnTop.Text = "Always On Top (like Task Manager)"
+        chkAlwaysOnTop.Location = New Point(20, 145)
+        chkAlwaysOnTop.Size = New Size(250, 20)
+        chkAlwaysOnTop.Checked = True ' Default to always on top
+        chkAlwaysOnTop.ForeColor = Color.DarkBlue
+        chkAlwaysOnTop.Font = New Font(chkAlwaysOnTop.Font, FontStyle.Bold)
+        AddHandler chkAlwaysOnTop.CheckedChanged, AddressOf ChkAlwaysOnTop_CheckedChanged
+
         ' Color Detection GroupBox - Moved down and increased height
         Dim grpColor As New GroupBox()
         grpColor.Text = "Color Detection"
-        grpColor.Location = New Point(10, 150) ' Moved down from 140
+        grpColor.Location = New Point(10, 170) ' Moved down to accommodate Always On Top checkbox
         grpColor.Size = New Size(410, 160) ' Increased height from 150
 
         chkColorDetection = New CheckBox()
@@ -217,7 +229,7 @@ Public Class Form1
         ' Status GroupBox - Moved down to avoid overlap
         Dim grpStatus As New GroupBox()
         grpStatus.Text = "Status & Information"
-        grpStatus.Location = New Point(10, 320) ' Moved down from 300
+        grpStatus.Location = New Point(10, 340) ' Moved down to accommodate checkbox
         grpStatus.Size = New Size(410, 140) ' Increased height
 
         lblStatus = New Label()
@@ -253,7 +265,7 @@ Public Class Form1
         grpStatus.Controls.AddRange({lblStatus, lblClickCount, lblHotkey, lblCurrentPos, btnReset})
 
         ' Add all groups to form
-        Me.Controls.AddRange({grpInterval, grpColor, grpStatus})
+        Me.Controls.AddRange({grpInterval, chkAlwaysOnTop, grpColor, grpStatus})
     End Sub
 
     Private Sub SetupTimers()
@@ -522,6 +534,33 @@ Public Class Form1
 
     Private Sub NudTolerance_ValueChanged(sender As Object, e As EventArgs)
         colorTolerance = CInt(nudTolerance.Value)
+    End Sub
+
+    Private Sub ChkAlwaysOnTop_CheckedChanged(sender As Object, e As EventArgs)
+        Try
+            Me.TopMost = chkAlwaysOnTop.Checked
+            
+            ' Provide visual feedback
+            If chkAlwaysOnTop.Checked Then
+                chkAlwaysOnTop.ForeColor = Color.DarkBlue
+                ' Briefly show a tooltip-like message
+                Dim originalText As String = chkAlwaysOnTop.Text
+                chkAlwaysOnTop.Text = "✓ Always On Top ENABLED"
+                Application.DoEvents()
+                Threading.Thread.Sleep(800)
+                chkAlwaysOnTop.Text = originalText
+            Else
+                chkAlwaysOnTop.ForeColor = Color.Gray
+                ' Briefly show a tooltip-like message
+                Dim originalText As String = chkAlwaysOnTop.Text
+                chkAlwaysOnTop.Text = "✗ Always On Top DISABLED"
+                Application.DoEvents()
+                Threading.Thread.Sleep(800)
+                chkAlwaysOnTop.Text = originalText
+            End If
+        Catch ex As Exception
+            MessageBox.Show("Error toggling always on top: " & ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        End Try
     End Sub
 
     Private Sub ChkColorDetection_CheckedChanged(sender As Object, e As EventArgs)
