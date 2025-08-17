@@ -13,7 +13,7 @@ Option Explicit On
 Imports System
 Imports System.Reflection
 <Assembly: System.Reflection.AssemblyCompanyAttribute("WinFormsApp7"),  _
- Assembly: System.Reflection.AssemblyConfigurationAttribute("Release"),  _
+ Assembly: System.Reflection.AssemblyConfigurationAttribute("release"),  _
  Assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0"),  _
  Assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0"),  _
  Assembly: System.Reflection.AssemblyProductAttribute("WinFormsApp7"),  _
